@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Trang Trại - Full 3 Tabs & Filter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* CSS ÉP MÀU TRỰC TIẾP */
+        .is-healthy td { background-color: #d1e7dd !important; color: #0f5132 !important; }
+        .is-sick td { background-color: #f8d7da !important; color: #842029 !important; }
+        .is-warning td { background-color: #fff3cd !important; color: #664d03 !important; }
+
+        body { background-color: #f4f7f6; padding-top: 20px; font-family: sans-serif; }
+        .main-card { border: none; box-shadow: 0 0 20px rgba(0,0,0,0.1); border-radius: 15px; }
+        .nav-tabs .nav-link { color: #495057; font-weight: 600; border: none; }
+        .nav-tabs .nav-link.active { color: #198754; border-bottom: 3px solid #198754; background: none; }
+        .table { border-spacing: 0 5px; border-collapse: separate; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card main-card p-4">
+        <h3 class="text-success fw-bold text-center mb-4">HỆ THỐNG QUẢN LÝ TỔNG HỢP</h3>
+
+        <div class="row g-2 mb-4">
+            <div class="col-md-5">
+                <input type="text" id="mainSearch" class="form-control" placeholder="🔍 Tìm mã vật nuôi...">
+            </div>
+            <div class="col-md-4">
+                <select id="mainFilter" class="form-select">
+                    <option value="">🎯 Tất cả trạng thái (Filter)</option>
+                    <option value="Đang Nuôi">✅ Đang Nuôi</option>
+                    <option value="Bệnh">❌ Đang Bệnh</option>
+                    <option value="Mang Thai">🤰 Mang Thai</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-success w-100 fw-bold" onclick="openAddModal()">+ THÊM DỮ LIỆU</button>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-3" id="farmTabs">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab1">1. Danh sách vật nuôi</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2">2. Tình trạng sức khỏe</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab3">3. Lịch sử bệnh</button></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="tab1">
+                <div class="table-responsive">
+                    <table class="table align-middle" id="tableVatNuoi">
+                        <thead class="table-dark">
+                            <tr><th>Mã số</th><th>Loài</th><th>Trạng thái</th><th>Thao tác</th></tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="tab2">
+                <div class="table-responsive">
+                    <table class="table align-middle" id="tableSucKhoe">
+                        <thead class="table-primary">
+                            <tr><th>Mã số</th><th>Tình trạng</th><th>Kết quả</th><th>Thao tác</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="tab3">
+                <div class="table-responsive">
+                    <table class="table align-middle" id="tableLichSu">
+                        <thead class="table-danger">
+                            <tr><th>Mã số</th><th>Tên bệnh</th><th>Điều trị</th><th>Thao tác</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="farmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form class="modal-content shadow" id="farmForm">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Cập nhật thông tin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3"><label class="fw-bold">Mã vật nuôi</label><input type="text" id="fId" class="form-control" required></div>
+                <div class="mb-3"><label class="fw-bold">Loài</label><input type="text" id="fLoai" class="form-control" required></div>
+                <div class="mb-3">
+                    <label class="fw-bold">Trạng thái</label>
+                    <select id="fStatus" class="form-select">
+                        <option value="Đang Nuôi">Đang Nuôi</option>
+                        <option value="Bệnh">Bệnh</option>
+                        <option value="Mang Thai">Mang Thai</option>
+                    </select>
+                </div>
+                <div id="sickDetail" style="display:none;" class="p-2 border rounded bg-light">
+                    <div class="mb-2"><label class="small fw-bold">Tên bệnh</label><input type="text" id="fBenh" class="form-control form-control-sm"></div>
+                    <div class="mb-2"><label class="small fw-bold">Cách điều trị</label><input type="text" id="fDieuTri" class="form-control form-control-sm"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success w-100">LƯU DỮ LIỆU</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const farmModal = new bootstrap.Modal(document.getElementById('farmModal'));
+    let editId = null; 
+
+    // Mảng chứa dữ liệu (Giả lập Database)
+    let farmData = [
+        {id: 'BT001', loai: 'Bò Thịt', status: 'Đang Nuôi', benh: '', treat: 'Bình thường'},
+        {id: 'H001', loai: 'Heo', status: 'Bệnh', benh: 'Tiêu chảy', treat: 'Uống thuốc'},
+        {id: 'BS002', loai: 'Bò Sữa', status: 'Mang Thai', benh: '', treat: 'Theo dõi thai'}
+    ];
+
+    // Hàm hiển thị Form thêm
+    function openAddModal() {
+        editId = null;
+        document.getElementById('farmForm').reset();
+        document.getElementById('sickDetail').style.display = 'none';
+        farmModal.show();
+    }
+
+    // Hiển thị thêm ô nhập bệnh nếu chọn trạng thái Bệnh
+    document.getElementById('fStatus').addEventListener('change', function() {
+        document.getElementById('sickDetail').style.display = (this.value === 'Bệnh') ? 'block' : 'none';
+    });
+
+    // HÀM RENDER DỮ LIỆU RA 3 TABS
+    function renderTables() {
+        const t1 = document.querySelector('#tableVatNuoi tbody');
+        const t2 = document.querySelector('#tableSucKhoe tbody');
+        const t3 = document.querySelector('#tableLichSu tbody');
+        
+        t1.innerHTML = ''; t2.innerHTML = ''; t3.innerHTML = '';
+
+        farmData.forEach(item => {
+            let color = (item.status === 'Bệnh') ? 'is-sick' : (item.status === 'Mang Thai' ? 'is-warning' : 'is-healthy');
+
+            // Tab 1: Tổng quát
+            t1.innerHTML += `<tr class="${color}" data-status="${item.status}">
+                <td>${item.id}</td><td>${item.loai}</td><td>${item.status}</td>
+                <td><button onclick="editItem('${item.id}')" class="btn btn-sm btn-dark">Sửa</button> <button onclick="deleteItem('${item.id}')" class="btn btn-sm btn-danger">Xóa</button></td>
+            </tr>`;
+
+            // Tab 2: Sức khỏe
+            t2.innerHTML += `<tr class="${color}" data-status="${item.status}">
+                <td>${item.id}</td><td>${item.status}</td><td>${item.treat}</td>
+                <td><button onclick="deleteItem('${item.id}')" class="btn btn-sm btn-danger">Xóa</button></td>
+            </tr>`;
+
+            // Tab 3: Lịch sử (Chỉ hiện nếu có bệnh hoặc đã từng bệnh)
+            if(item.benh) {
+                t3.innerHTML += `<tr class="is-sick" data-status="${item.status}">
+                    <td>${item.id}</td><td>${item.benh}</td><td>${item.treat}</td>
+                    <td><button onclick="deleteItem('${item.id}')" class="btn btn-sm btn-danger">Xóa</button></td>
+                </tr>`;
+            }
+        });
+        applyFilters(); // Gọi lọc ngay sau khi render
+    }
+
+    // XỬ LÝ LƯU FORM
+    document.getElementById('farmForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const newItem = {
+            id: document.getElementById('fId').value,
+            loai: document.getElementById('fLoai').value,
+            status: document.getElementById('fStatus').value,
+            benh: document.getElementById('fBenh').value,
+            treat: (document.getElementById('fStatus').value === 'Bệnh') ? document.getElementById('fDieuTri').value : 'Ổn định'
+        };
+
+        if(editId) {
+            const index = farmData.findIndex(i => i.id === editId);
+            farmData[index] = newItem;
+        } else {
+            farmData.push(newItem);
+        }
+        
+        farmModal.hide();
+        renderTables();
+    });
+
+    // XỬ LÝ SỬA / XÓA
+    window.deleteItem = (id) => {
+        if(confirm("Xóa bản ghi này khỏi toàn bộ hệ thống?")) {
+            farmData = farmData.filter(i => i.id !== id);
+            renderTables();
+        }
+    }
+
+    window.editItem = (id) => {
+        const item = farmData.find(i => i.id === id);
+        editId = id;
+        document.getElementById('fId').value = item.id;
+        document.getElementById('fLoai').value = item.loai;
+        document.getElementById('fStatus').value = item.status;
+        document.getElementById('fBenh').value = item.benh;
+        document.getElementById('fDieuTri').value = item.treat;
+        document.getElementById('sickDetail').style.display = (item.status === 'Bệnh') ? 'block' : 'none';
+        farmModal.show();
+    }
+
+    // CHỨC NĂNG TÌM KIẾM & LỌC CHO CẢ 3 TABS
+    function applyFilters() {
+        const sText = document.getElementById('mainSearch').value.toLowerCase();
+        const fStatus = document.getElementById('mainFilter').value;
+
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const rowText = row.innerText.toLowerCase();
+            const rowStatus = row.getAttribute('data-status');
+
+            const matchSearch = rowText.includes(sText);
+            const matchFilter = (fStatus === "" || rowStatus === fStatus);
+
+            row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('mainSearch').addEventListener('input', applyFilters);
+    document.getElementById('mainFilter').addEventListener('change', applyFilters);
+
+    // Khởi tạo lần đầu
+    renderTables();
+</script>
+</body>
+</html>
