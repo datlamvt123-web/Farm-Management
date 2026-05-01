@@ -3,240 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Trang Trại - Full 3 Tabs & Filter</title>
+    <title>Hệ Thống Quản Lý Trang Trại Pro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        /* CSS ÉP MÀU TRỰC TIẾP */
-        .is-healthy td { background-color: #d1e7dd !important; color: #0f5132 !important; }
-        .is-sick td { background-color: #f8d7da !important; color: #842029 !important; }
-        .is-warning td { background-color: #fff3cd !important; color: #664d03 !important; }
+        :root { --sidebar-width: 250px; --primary-color: #198754; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Login Overlay */
+        #loginOverlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        
+        /* Layout */
+        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; background: #212529; color: white; transition: all 0.3s; }
+        .main-content { margin-left: var(--sidebar-width); padding: 20px; }
+        .nav-link { color: rgba(255,255,255,0.7); border-radius: 5px; margin: 5px 15px; }
+        .nav-link.active { background: var(--primary-color); color: white; }
+        .nav-link:hover { color: white; background: rgba(255,255,255,0.1); }
 
-        body { background-color: #f4f7f6; padding-top: 20px; font-family: sans-serif; }
-        .main-card { border: none; box-shadow: 0 0 20px rgba(0,0,0,0.1); border-radius: 15px; }
-        .nav-tabs .nav-link { color: #495057; font-weight: 600; border: none; }
-        .nav-tabs .nav-link.active { color: #198754; border-bottom: 3px solid #198754; background: none; }
-        .table { border-spacing: 0 5px; border-collapse: separate; }
+        /* Card Styles */
+        .stat-card { border: none; border-left: 5px solid var(--primary-color); border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .section-pane { display: none; }
+        .section-pane.active { display: block; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card main-card p-4">
-        <h3 class="text-success fw-bold text-center mb-4">HỆ THỐNG QUẢN LÝ TỔNG HỢP</h3>
+<!-- 1. TRANG ĐĂNG NHẬP -->
+<div id="loginOverlay">
+    <div class="card shadow p-4" style="width: 350px;">
+        <div class="text-center mb-4">
+            <i class="bi bi-tree-fill text-success" style="font-size: 3rem;"></i>
+            <h4 class="fw-bold">FARM MANAGEMENT</h4>
+        </div>
+        <div class="mb-3">
+            <label>Tên đăng nhập</label>
+            <input type="text" id="userInp" class="form-control" placeholder="admin hoặc staff">
+        </div>
+        <div class="mb-3">
+            <label>Mật khẩu</label>
+            <input type="password" id="passInp" class="form-control" value="123">
+        </div>
+        <button class="btn btn-success w-100 fw-bold" onclick="handleLogin()">ĐĂNG NHẬP</button>
+        <p class="small text-muted mt-3 text-center">Gợi ý: admin/123 hoặc staff/123</p>
+    </div>
+</div>
 
-        <div class="row g-2 mb-4">
-            <div class="col-md-5">
-                <input type="text" id="mainSearch" class="form-control" placeholder="🔍 Tìm mã vật nuôi...">
-            </div>
-            <div class="col-md-4">
-                <select id="mainFilter" class="form-select">
-                    <option value="">🎯 Tất cả trạng thái (Filter)</option>
-                    <option value="Đang Nuôi">✅ Đang Nuôi</option>
-                    <option value="Bệnh">❌ Đang Bệnh</option>
-                    <option value="Mang Thai">🤰 Mang Thai</option>
-                </select>
+<!-- 2. SIDEBAR NAVIGATION -->
+<div class="sidebar d-flex flex-column shadow">
+    <div class="p-3 text-center border-bottom border-secondary">
+        <h5 class="mb-0 fw-bold text-success">TRANG TRẠI XANH</h5>
+        <small id="userRoleBadge" class="badge bg-light text-dark mt-2"></small>
+    </div>
+    <div class="nav flex-column mt-3">
+        <!-- Chung -->
+        <a href="#" class="nav-link active" onclick="showSection('sec-dashboard')"><i class="bi bi-speedometer2 me-2"></i> Tổng quan</a>
+        
+        <!-- Phân quyền hiển thị qua class -->
+        <a href="#" class="nav-link" onclick="showSection('sec-vatnuoi')"><i class="bi bi-piggy-bank me-2"></i> Vật nuôi</a>
+        <a href="#" class="nav-link" onclick="showSection('sec-suckhoe')"><i class="bi bi-heart-pulse me-2"></i> Sức khỏe</a>
+        <a href="#" class="nav-link" onclick="showSection('sec-chuongtrai')"><i class="bi bi-house-door me-2"></i> Chuồng trại</a>
+        
+        <div class="role-admin">
+            <hr class="mx-3 border-secondary">
+            <small class="mx-4 text-muted text-uppercase" style="font-size: 0.7rem;">Quản lý</small>
+            <a href="#" class="nav-link" onclick="showSection('sec-nhanvien')"><i class="bi bi-people me-2"></i> Nhân viên</a>
+            <a href="#" class="nav-link" onclick="showSection('sec-chiphi')"><i class="bi bi-cash-stack me-2"></i> Chi phí</a>
+        </div>
+
+        <div class="role-staff">
+            <hr class="mx-3 border-secondary">
+            <small class="mx-4 text-muted text-uppercase" style="font-size: 0.7rem;">Cá nhân</small>
+            <a href="#" class="nav-link" onclick="showSection('sec-lichlam')"><i class="bi bi-calendar-event me-2"></i> Lịch làm việc</a>
+            <a href="#" class="nav-link" onclick="showSection('sec-choan')"><i class="bi bi-egg-fried me-2"></i> Lịch cho ăn</a>
+        </div>
+    </div>
+    <div class="mt-auto p-3 border-top border-secondary">
+        <button class="btn btn-outline-danger btn-sm w-100" onclick="location.reload()">Đăng xuất</button>
+    </div>
+</div>
+
+<main class="main-content">
+    
+    <!-- SECTION: DASHBOARD (ADMIN/STAFF) -->
+    <section id="sec-dashboard" class="section-pane active">
+        <h3 class="fw-bold mb-4">Tổng quan hệ thống</h3>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="card stat-card p-3">
+                    <small class="text-muted fw-bold">TỔNG VẬT NUÔI</small>
+                    <h2 class="mb-0">120</h2>
+                </div>
             </div>
             <div class="col-md-3">
-                <button class="btn btn-success w-100 fw-bold" onclick="openAddModal()">+ THÊM DỮ LIỆU</button>
-            </div>
-        </div>
-
-        <ul class="nav nav-tabs mb-3" id="farmTabs">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab1">1. Danh sách vật nuôi</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2">2. Tình trạng sức khỏe</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab3">3. Lịch sử bệnh</button></li>
-        </ul>
-
-        <div class="tab-content">
-            <div class="tab-pane fade show active" id="tab1">
-                <div class="table-responsive">
-                    <table class="table align-middle" id="tableVatNuoi">
-                        <thead class="table-dark">
-                            <tr><th>Mã số</th><th>Loài</th><th>Trạng thái</th><th>Thao tác</th></tr>
-                        </thead>
-                        <tbody>
-                            </tbody>
-                    </table>
+                <div class="card stat-card p-3 border-danger">
+                    <small class="text-muted fw-bold">ĐANG ĐIỀU TRỊ</small>
+                    <h2 class="mb-0 text-danger">5</h2>
                 </div>
             </div>
-
-            <div class="tab-pane fade" id="tab2">
-                <div class="table-responsive">
-                    <table class="table align-middle" id="tableSucKhoe">
-                        <thead class="table-primary">
-                            <tr><th>Mã số</th><th>Tình trạng</th><th>Kết quả</th><th>Thao tác</th></tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+            <div class="col-md-3">
+                <div class="card stat-card p-3 border-warning">
+                    <small class="text-muted fw-bold">CHUỒNG ĐẦY</small>
+                    <h2 class="mb-0 text-warning">8/10</h2>
                 </div>
             </div>
-
-            <div class="tab-pane fade" id="tab3">
-                <div class="table-responsive">
-                    <table class="table align-middle" id="tableLichSu">
-                        <thead class="table-danger">
-                            <tr><th>Mã số</th><th>Tên bệnh</th><th>Điều trị</th><th>Thao tác</th></tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+            <div class="col-md-3 role-admin">
+                <div class="card stat-card p-3 border-primary">
+                    <small class="text-muted fw-bold">CHI PHÍ THÁNG</small>
+                    <h2 class="mb-0 text-primary">15.5M</h2>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<div class="modal fade" id="farmModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form class="modal-content shadow" id="farmForm">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Cập nhật thông tin</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3"><label class="fw-bold">Mã vật nuôi</label><input type="text" id="fId" class="form-control" required></div>
-                <div class="mb-3"><label class="fw-bold">Loài</label><input type="text" id="fLoai" class="form-control" required></div>
-                <div class="mb-3">
-                    <label class="fw-bold">Trạng thái</label>
-                    <select id="fStatus" class="form-select">
-                        <option value="Đang Nuôi">Đang Nuôi</option>
-                        <option value="Bệnh">Bệnh</option>
-                        <option value="Mang Thai">Mang Thai</option>
-                    </select>
-                </div>
-                <div id="sickDetail" style="display:none;" class="p-2 border rounded bg-light">
-                    <div class="mb-2"><label class="small fw-bold">Tên bệnh</label><input type="text" id="fBenh" class="form-control form-control-sm"></div>
-                    <div class="mb-2"><label class="small fw-bold">Cách điều trị</label><input type="text" id="fDieuTri" class="form-control form-control-sm"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-success w-100">LƯU DỮ LIỆU</button>
-            </div>
-        </form>
-    </div>
-</div>
+    <!-- SECTION: VẬT NUÔI  -->
+    <section id="sec-vatnuoi" class="section-pane">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold">Danh sách vật nuôi</h3>
+            <button class="btn btn-success" onclick="openAddModal()">+ Thêm mới</button>
+        </div>
+        <div class="card p-3 shadow-sm">
+            <table class="table table-hover" id="tableVatNuoi">
+                <thead class="table-light">
+                    <tr><th>Mã</th><th>Giống</th><th>Chuồng</th><th>Trạng thái</th><th>Thao tác</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </section>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SECTION: LỊCH CHO ĂN  -->
+    <section id="sec-choan" class="section-pane">
+        <h3 class="fw-bold mb-3">Lịch cho ăn hôm nay</h3>
+        <div class="card p-3 border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th>Giờ</th><th>Đối tượng</th><th>Thức ăn</th><th>Lượng</th><th>Trạng thái</th></tr></thead>
+                    <tbody>
+                        <tr><td>07:00</td><td>Đàn Bò BT001</td><td>Cỏ khô</td><td>50kg</td><td><span class="badge bg-success">Đã xong</span></td></tr>
+                        <tr><td>16:00</td><td>Đàn Heo H001</td><td>Cám hỗn hợp</td><td>20kg</td><td><span class="badge bg-warning">Chờ</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
 <script>
-    const farmModal = new bootstrap.Modal(document.getElementById('farmModal'));
-    let editId = null; 
+    // 1. QUẢN LÝ USER & PHÂN QUYỀN
+    const USERS = {
+        'admin': { role: 'Quản lý', permissions: 'all' },
+        'staff': { role: 'Nhân viên', permissions: 'limited' }
+    };
 
-    // Mảng chứa dữ liệu (Giả lập Database)
+    function handleLogin() {
+        const user = document.getElementById('userInp').value;
+        if (USERS[user]) {
+            document.getElementById('loginOverlay').style.display = 'none';
+            initApp(user);
+        } else {
+            alert('Sai tài khoản!');
+        }
+    }
+
+    function initApp(userKey) {
+        const user = USERS[userKey];
+        document.getElementById('userRoleBadge').innerText = user.role;
+        
+        // Ẩn/Hiện Menu dựa trên vai trò
+        if (userKey === 'admin') {
+            document.querySelectorAll('.role-staff').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.role-admin').forEach(el => el.style.display = 'block');
+        } else {
+            document.querySelectorAll('.role-admin').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.role-staff').forEach(el => el.style.display = 'block');
+        }
+        renderVatNuoi();
+    }
+
+    // 2. CHUYỂN TAB (SECTION)
+    function showSection(sectionId) {
+        document.querySelectorAll('.section-pane').forEach(s => s.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+        
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    // 3. DATA & RENDER 
     let farmData = [
-        {id: 'BT001', loai: 'Bò Thịt', status: 'Đang Nuôi', benh: '', treat: 'Bình thường'},
-        {id: 'H001', loai: 'Heo', status: 'Bệnh', benh: 'Tiêu chảy', treat: 'Uống thuốc'},
-        {id: 'BS002', loai: 'Bò Sữa', status: 'Mang Thai', benh: '', treat: 'Theo dõi thai'}
+        {id: 'BT001', loai: 'Bò Thịt', chuong: 'C01', status: 'Đang Nuôi'},
+        {id: 'H001', loai: 'Heo', chuong: 'H02', status: 'Bệnh'}
     ];
 
-    // Hàm hiển thị Form thêm
-    function openAddModal() {
-        editId = null;
-        document.getElementById('farmForm').reset();
-        document.getElementById('sickDetail').style.display = 'none';
-        farmModal.show();
+    function renderVatNuoi() {
+        const tbody = document.querySelector('#tableVatNuoi tbody');
+        tbody.innerHTML = farmData.map(item => `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.loai}</td>
+                <td>${item.chuong}</td>
+                <td><span class="badge ${item.status==='Bệnh'?'bg-danger':'bg-success'}">${item.status}</span></td>
+                <td><button class="btn btn-sm btn-outline-dark">Sửa</button></td>
+            </tr>
+        `).join('');
     }
-
-    // Hiển thị thêm ô nhập bệnh nếu chọn trạng thái Bệnh
-    document.getElementById('fStatus').addEventListener('change', function() {
-        document.getElementById('sickDetail').style.display = (this.value === 'Bệnh') ? 'block' : 'none';
-    });
-
-    // HÀM RENDER DỮ LIỆU RA 3 TABS
-    function renderTables() {
-        const t1 = document.querySelector('#tableVatNuoi tbody');
-        const t2 = document.querySelector('#tableSucKhoe tbody');
-        const t3 = document.querySelector('#tableLichSu tbody');
-        
-        t1.innerHTML = ''; t2.innerHTML = ''; t3.innerHTML = '';
-
-        farmData.forEach(item => {
-            let color = (item.status === 'Bệnh') ? 'is-sick' : (item.status === 'Mang Thai' ? 'is-warning' : 'is-healthy');
-
-            // Tab 1: Tổng quát
-            t1.innerHTML += `<tr class="${color}" data-status="${item.status}">
-                <td>${item.id}</td><td>${item.loai}</td><td>${item.status}</td>
-                <td><button onclick="editItem('${item.id}')" class="btn btn-sm btn-dark">Sửa</button> <button onclick="deleteItem('${item.id}')" class="btn btn-sm btn-danger">Xóa</button></td>
-            </tr>`;
-
-            // Tab 2: Sức khỏe
-            t2.innerHTML += `<tr class="${color}" data-status="${item.status}">
-                <td>${item.id}</td><td>${item.status}</td><td>${item.treat}</td>
-                <td><button onclick="deleteItem('${item.id}')" class="btn btn-sm btn-danger">Xóa</button></td>
-            </tr>`;
-
-            // Tab 3: Lịch sử (Chỉ hiện nếu có bệnh hoặc đã từng bệnh)
-            if(item.benh) {
-                t3.innerHTML += `<tr class="is-sick" data-status="${item.status}">
-                    <td>${item.id}</td><td>${item.benh}</td><td>${item.treat}</td>
-                    <td><button onclick="deleteItem('${item.id}')" class="btn btn-sm btn-danger">Xóa</button></td>
-                </tr>`;
-            }
-        });
-        applyFilters(); // Gọi lọc ngay sau khi render
-    }
-
-    // XỬ LÝ LƯU FORM
-    document.getElementById('farmForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const newItem = {
-            id: document.getElementById('fId').value,
-            loai: document.getElementById('fLoai').value,
-            status: document.getElementById('fStatus').value,
-            benh: document.getElementById('fBenh').value,
-            treat: (document.getElementById('fStatus').value === 'Bệnh') ? document.getElementById('fDieuTri').value : 'Ổn định'
-        };
-
-        if(editId) {
-            const index = farmData.findIndex(i => i.id === editId);
-            farmData[index] = newItem;
-        } else {
-            farmData.push(newItem);
-        }
-        
-        farmModal.hide();
-        renderTables();
-    });
-
-    // XỬ LÝ SỬA / XÓA
-    window.deleteItem = (id) => {
-        if(confirm("Xóa bản ghi này khỏi toàn bộ hệ thống?")) {
-            farmData = farmData.filter(i => i.id !== id);
-            renderTables();
-        }
-    }
-
-    window.editItem = (id) => {
-        const item = farmData.find(i => i.id === id);
-        editId = id;
-        document.getElementById('fId').value = item.id;
-        document.getElementById('fLoai').value = item.loai;
-        document.getElementById('fStatus').value = item.status;
-        document.getElementById('fBenh').value = item.benh;
-        document.getElementById('fDieuTri').value = item.treat;
-        document.getElementById('sickDetail').style.display = (item.status === 'Bệnh') ? 'block' : 'none';
-        farmModal.show();
-    }
-
-    // CHỨC NĂNG TÌM KIẾM & LỌC CHO CẢ 3 TABS
-    function applyFilters() {
-        const sText = document.getElementById('mainSearch').value.toLowerCase();
-        const fStatus = document.getElementById('mainFilter').value;
-
-        document.querySelectorAll('tbody tr').forEach(row => {
-            const rowText = row.innerText.toLowerCase();
-            const rowStatus = row.getAttribute('data-status');
-
-            const matchSearch = rowText.includes(sText);
-            const matchFilter = (fStatus === "" || rowStatus === fStatus);
-
-            row.style.display = (matchSearch && matchFilter) ? '' : 'none';
-        });
-    }
-
-    document.getElementById('mainSearch').addEventListener('input', applyFilters);
-    document.getElementById('mainFilter').addEventListener('change', applyFilters);
-
-    // Khởi tạo lần đầu
-    renderTables();
 </script>
+
 </body>
 </html>
